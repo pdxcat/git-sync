@@ -114,9 +114,12 @@ class PuppetSync
           git(:submodule, 'update --init --recursive')
         end
         git(:clean, '-d -x -f')
-        git(:"ls-files", '--other --exclude-standard').each do |path|
-          output "Recursively deleting untracked file(s) #{path.chomp}" if @options.verbose
-          FileUtils.remove_entry_secure(path.chomp)
+        ls_files = git(:"ls-files", '--other --exclude-standard')
+        unless ls_files == ""
+          ls_files.each do |path|
+            output "Recursively deleting untracked file(s) #{path.chomp}" if @options.verbose
+            FileUtils.remove_entry_secure(path.chomp)
+          end
         end
 
         output "Touch: #{STAMP}" if @options.verbose
