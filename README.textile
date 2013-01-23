@@ -6,19 +6,18 @@ repository to your Puppet master.
 h2. Usage
 
 <pre>
-   puppet-sync -b BRANCH [options]
-   puppet-sync -s [options]
-    -b, --branch BRANCH     Mandatory; specify the git branch to clone.
-    -d, --deploy DIR        Specify the directory to deploy to.
-    -D, --delete            Remove the specified branch from the deployment directory.
-    -r, --repository URL    Git url for the repository.
-    -s, --submodules-enabled SUBMODULES Comma-separated list of submodules to
-                                        update. If not specified, all submodules
-                                        in the repo will be updated.
-    Common options:
-    -V, --version           Display the script version.
-    -v, --verbose           Be more verbose.
-    -h, --help              Show this message
+Usage: puppet-sync -b BRANCH [options]
+    -b, --branch BRANCH              Mandatory, specify the git branch to clone.
+    -d, --deploy DIR                 Specify the directory to deploy to.
+    -e, --environment DIR            Specify the name of the environment to deploy to, defaults to the branch.
+    -D, --delete                     Remove the specified branch from the deployment directory.
+    -r, --repository URL             Git url for the repository.
+    -s SUBMODULES                    Comma-seperated list of submodule paths to enable.
+        --submodules-enabled
+Common options:
+    -V, --version                    Display the script version.
+    -v, --verbose                    Be more verbose.
+    -h, --help                       Show this message
 </pre>
 
 To sync a specific branch, to specific location, from a specific repository run the
