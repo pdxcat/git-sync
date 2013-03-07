@@ -13,7 +13,7 @@
 #   Hunter Haugen: The first guy to blog about dynamic branch -> environment
 #   http://hunnur.com/blog/2010/10/dynamic-git-branch-puppet-environments/
 #
-# Puppet Sync
+# git Sync
 #
 # This script may be used to sync a git branch from your repository
 # to puppet master.
@@ -40,10 +40,10 @@ require 'optparse'
 require 'ostruct'
 require 'socket'
 
-class PuppetSync
+class GitSync
 
   VERSION = "1.2-pdxcat2"
-  STAMP   = ".puppet-sync-stamp"
+  STAMP   = ".git-sync-stamp"
 
   def initialize(arguments)
     @arguments = arguments
@@ -66,23 +66,22 @@ class PuppetSync
     unless parsed_options? && arguments_valid?
       abort "ERROR: invalid arguments given."
     end
-    @options.environment = @options.branch if @options.environment.nil?
 
-    deploy = deploy_directory(@options.environment)
-    output "---------------------------------------------- PuppetSync ---", ".-"
+    deploy = deploy_directory(@options.branch)
+    output "---------------------------------------------- GitSync ---", ".-"
     output "Host        : #{Socket.gethostbyname(Socket.gethostname).first}"
     output "Branch      : #{@options.branch}"
     output "Deploy To   : #{deploy}" unless @options.delete
     output "Delete From : #{deploy}" if @options.delete
     output "Repository  : #{@options.repository}"
 
-    self.update(@options.branch, @options.environment, :delete => @options.delete)
+    self.update(@options.branch, :delete => @options.delete)
 
     output "-------------------------------------------------------------\n", "`-"
   end
 
-  def update(branch, environment, opts={})
-    deploy = deploy_directory(environment)
+  def update(branch, opts={})
+    deploy = deploy_directory(branch)
 
     if File.exists?(deploy) and not File.exists?("#{deploy}/#{STAMP}")
       raise "ERROR: Environment directory is not managed by puppet-sync."
@@ -114,12 +113,9 @@ class PuppetSync
           git(:submodule, 'update --init --recursive')
         end
         git(:clean, '-d -x -f')
-        ls_files = git(:"ls-files", '--other --exclude-standard')
-        unless ls_files == ""
-          ls_files.each do |path|
-            output "Recursively deleting untracked file(s) #{path.chomp}" if @options.verbose
-            FileUtils.remove_entry_secure(path.chomp)
-          end
+        git(:"ls-files", '--other --exclude-standard').each do |path|
+          output "Recursively deleting untracked file(s) #{path.chomp}" if @options.verbose
+          FileUtils.remove_entry_secure(path.chomp)
         end
 
         output "Touch: #{STAMP}" if @options.verbose
@@ -161,7 +157,7 @@ class PuppetSync
   end
 
   def deploy_directory(branch)
-    return "#{@options.deploy}/#{branch}"
+    return "#{@options.deploy}"
   end
 
   def parsed_options?
@@ -175,10 +171,6 @@ class PuppetSync
 
     opts.on('-d', '--deploy DIR', 'Specify the directory to deploy to.') do |deploy|
       @options.deploy = deploy
-    end
-
-    opts.on('-e', '--environment DIR', 'Specify the name of the environment to deploy to, defaults to the branch.') do |environment|
-      @options.environment = environment
     end
 
     opts.on('-D', '--delete', 'Remove the specified branch from the deployment directory.') do
@@ -220,5 +212,5 @@ class PuppetSync
 
 end
 
-app = PuppetSync.new(ARGV)
+app = GitSync.new(ARGV)
 app.run

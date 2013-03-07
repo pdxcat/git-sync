@@ -1,15 +1,17 @@
-h1. Puppet Sync
+h1. Git Sync
 
 This project provides a script to synchronize you manifests from a GIT
 repository to your Puppet master.
 
+It is a fork of http://github.com/pdxcat/puppet-sync for more general
+use cases.
+
 h2. Usage
 
 <pre>
-Usage: puppet-sync -b BRANCH [options]
+Usage: git-sync -b BRANCH [options]
     -b, --branch BRANCH              Mandatory, specify the git branch to clone.
     -d, --deploy DIR                 Specify the directory to deploy to.
-    -e, --environment DIR            Specify the name of the environment to deploy to, defaults to the branch.
     -D, --delete                     Remove the specified branch from the deployment directory.
     -r, --repository URL             Git url for the repository.
     -s SUBMODULES                    Comma-seperated list of submodule paths to enable.
@@ -24,7 +26,7 @@ To sync a specific branch, to specific location, from a specific repository run 
 script with the following arguments:
 
 <pre>
-  puppet-sync --branch master \
+  git-sync --branch master \
               --deploy /etc/puppet/environments \
               --repository ssh+git://git/puppet.git
 </pre>
@@ -52,7 +54,7 @@ Now you need to add the following to the Git hook file:
   # File: /git/puppet.git/hooks/post-update
 
   REPO="git@githost.cat.pdx.edu:puppet.git"
-  DEPLOY="/etc/puppet/environments"
+  DEPLOY="/etc/puppet/environments/production"
   SSH_ARGS="-i /path/to/privatekey"
   PUPPETMASTER="puppet@puppetmaster.cat.pdx.edu"
   SYNC_COMMAND="/usr/local/bin/puppet-sync"
@@ -61,7 +63,10 @@ Now you need to add the following to the Git hook file:
   do
     BRANCH=`echo $refname | sed -n 's/^refs\/heads\///p'`
     [ "$newrev" -eq 0 ] 2> /dev/null && DELETE='--delete' || DELETE=''
-
+    if [ $BRANCH != "master" ]; then.
+      echo "Branch is not master, therefore not pushing to $PUPPETMASTER:$DEPLOY"
+      exit 0
+    fi
     ssh $SSH_ARGS "$PUPPETMASTER" "$SYNC_COMMAND" \
       --branch "$BRANCH" \
       --repository "$REPO" \

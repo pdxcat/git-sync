@@ -2,16 +2,19 @@
 # File: /git/puppet.git/hooks/post-receive
 
 REPO="git@githost.cat.pdx.edu:puppet.git"
-DEPLOY="/etc/puppet/environments"
+DEPLOY="/etc/puppet/environments/production"
 SSH_ARGS="-i /path/to/privatekey"
 PUPPETMASTER="puppet@puppetmaster.cat.pdx.edu"
-SYNC_COMMAND="/usr/local/bin/puppet-sync"
+SYNC_COMMAND="/usr/bin/puppet-sync"
 
 while read oldrev newrev refname
 do
   BRANCH=`echo $refname | sed -n 's/^refs\/heads\///p'`
   [ "$newrev" -eq 0 ] 2> /dev/null && DELETE='--delete' || DELETE=''
-
+  if [ $BRANCH != "master" ]; then.
+    echo "Branch is not master, therefore not pushing to $PUPPETMASTER:$DEPLOY"
+    exit 0
+  fi
   ssh $SSH_ARGS "$PUPPETMASTER" "$SYNC_COMMAND" \
     --branch "$BRANCH" \
     --repository "$REPO" \
