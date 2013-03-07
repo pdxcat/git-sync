@@ -1,0 +1,18 @@
+Source: git-sync
+Section: ruby
+Priority: optional
+Maintainer: Spencer Krum, <nibz@cat.pdx.edu>
+Build-Depends: debhelper (>= 7),
+               ruby (>= 1.8.7)
+Standards-Version: 3.9.2
+X-Ruby-Version: >= 1.8.7
+
+
+Package: git-sync
+Architecture: all
+Section: ruby
+Depends: ruby, ${misc:Depends}, ${python:Depends}
+Description: Git syncing script, pull based
+  Git-sync allows git repositories to be kept in sync via git
+  hooks or other means. Pull based, able to handle force pushes
+  and submodules.
