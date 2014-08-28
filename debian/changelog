@@ -1,3 +1,9 @@
+git-sync (1.0.2) trusty; urgency=low
+
+  * Fix for ruby 1.9 compliance
+
+ -- Spencer Krum <nibz@cat.pdx.edu>  Wed, 06 Mar 2013 16:46:14 -0800
+
 git-sync (1.0.1) precise; urgency=low
 
   * Update requirements
